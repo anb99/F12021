@@ -1,0 +1,1827 @@
+---
+title: "Max Verstappen was the best driver of the 2021 Formula One season."
+author: 
+  - Athaliah Biju
+thanks: "Code and data are available at: LINK."
+date: "`r format(Sys.time(), '%d %B %Y')`"
+keywords: "Formula One, car racing, motorsport, Verstappen, Hamilton, F1"
+abstract: "This paper will be an analysis on the 2021 Formula One season. 2021 champion, Max Verstappen was crowned under controversial circumstances. Considering other variables ndependent of total point count such as race wins, podiums and pole positions, Verstappen was the best driver of the 2021 season. "
+output:
+  bookdown::pdf_document2
+toc: FALSE
+bibliography: references.bib
+---
+
+
+```{r, include=FALSE}
+library(tidyverse)
+library(readr)
+library(devtools)
+library(janitor)
+library(knitr)
+
+install_github("arkraieski/formula1data")
+force = TRUE
+
+library(formula1data)
+```
+
+
+# Introduction
+
+Formula One (F1) is the world's most prestigious motorsport competition. The first ever Formula One Driver's Championship was held in 1950 [@Judde]. The sport has seen an explosion in popularity in recent years, with a cumulative viewership of 1.5 billion during the 2021 season [@F1_viewership]. The final race, held in Abu Dhabi, drew 108.7 million viewers [@F1_viewership]. The surge in interest in the sport can be ascribed to the hit Netflix documentary series, \textit {Formula 1: Drive to Survive}. F1 consists of 10 teams: McLaren, Red Bull, Mercedes, Ferrari, Aston Martin, Alpine, Alpha Tauri, Williams, Alpha Romeo and Haas. Each team has two drivers each, with a total of 20 drivers competing for the World Drivers Championship (WDC) as seen in Table \@ref(tab:drivers). The teams, on the other hand, compete for the World Constructor's Championship (WCC). The driver and/or constructor with the most points at the end of the season are crowned WDC and WCC respectively.
+
+A typical race weekend sees three days of action on track. Friday consists of two Free Practice sessions (FP1 and FP2). These critical 60 minute sessions give teams the chance to test different setups and collect data to determine the optimal tyre and race strategy [@weekend]. Saturday sees an additional FP session (FP3) as well as Qualifying [@weekend]. Qualifying is a 60 minute session that determines the grid position for the main Grand Prix on Saturday. This is determined through race pace (which is how fast the car can go) alone [@weekend]. Qualifying is further divided into three sessions: Q1, Q2 and Q3. The slowest five cars get eliminated in Q1 and determine positions 16-20 [@weekend]. The subsequent slowest five cars determine positions 11-15 [@weekend]. Therefore, the goal is to be the fastest car in Q3 to secure pole position (first place on the grid) [@weekend].The main event - the Grand Prix - is held on Sunday. The exact number of laps depends on the circuit but must have a minimum race distance of 305 km and must not exceed two hours [@Kallor].The first to cross the finish line when the chequered flag is waved is deemed the winner. The top 10 race finishers receive points, as seen in Table \@ref(tab:points) [@points]. The driver with the fastest lap of the race is awarded an extra point, contingent on a top 10 finish.
+
+The 2021 season saw the introduction of F1 Sprint Qualifying, which sees a modified schedule. The number of FP sessions is reduced to two. On Fridays, FP1 and Qualifying is held. The Qualifying session sets the grid for the Sprint. FP2 is held on Saturday before the Sprint. The Sprint is a 100 km race that determines the race grid for the main Grand Prix [@Barretto].This was done to spice up a familiar format. The top three drivers of the Sprint qualifying will earn three, two and one point respectively [@Barretto].The Sprint format was seen at the British GP, Italian GP and Brazilian GP.
+
+Lewis Hamilton, who drives for Mercedes, has won the WDC every single year since 2014, except for 2016 -  which was won by teammate Nico Rosberg. Since the genesis of the turbo-hybrid era, Mercedes has won the WCC. Few were able to prove a worthy competitor to Hamilton and Mercedes, that is, until 2021. Red Bull and driver Max Verstappen were able to match the Mercedes' pace. The 2021 season was one of the most dramatic and unpredictable seasons in recent years, with the championship lead changing hands often. Verstappen and Hamilton were in a league of their own. Verstappen and Hamilton had equal points going into the last race. As a result, the season finale race served as the championship decider. Verstappen ended up winning the race, albeit under controversial circumstances. As a result, the Max Verstappen was crowned the 2021 Formula One champion. Mercedes won the WCC for the eighth year in a row. There has been much debate surrounding the final race and whether Verstappen was a worthy champion. This paper seeks to determine who the best driver in the 2021 season was when considering other variables such as race wins, number of podiums and qualifying results in addition to the total accumulated WDC points.
+
+# Data
+
+The analysis was conducted using R [@citeR]. The dataset was obtained from an R package called `formula1data` made by 'arkraieski' on GitHub [@Kraieski]. This package was imported using `devtools` [@citeDevtools]. The `formula1data` package imports Formula 1 data from the 'Ergast' API [@Ergast].I chose to use this package as opposed to the API directly as the package would allow for cleaner analysis. Further cleaning was done using `tidyverse` [@citeTidyverse], `janitor` [@citeJanitor]. The graphs were created using the `ggplot2` package [@citeGgplot]. Tables were constructed using `knitr`[@citeKnitr].
+
+The data frames I worked with the most were the Race Results, Qualifying Results and Final F1 Standings. I chose these three data frames as I felt it would allow me to tell the story of the 2021 season better. I wanted to focus on the driver performance, I excluded data about the constructors.  While much of the data was clean, a lot of manipulation had to be done to extract the desired variables out of a massive dataset. For example, to construct the graph showing the points progression, I had to extract race data individually and then recombine them in a manner that would allow me to show the cumulative points the drivers earned over the course of the season. 
+
+\newpage
+# Results
+
+The 2021 Formula One season consisted of 22 races. The championship standings were decided at the end of the Abu Dhabi Grand Prix, as seen in Table \@ref(tab:tab3).
+
+
+Table: (\#tab:drivers) Drivers competing in the Formula 1 World Driver's Championship during the 2021 season
+
+| Name                     | Constructor                                     |  
+|--------------------------|-------------------------------------------------|
+| Max Verstappen           | Red Bull Racing                                 |
+| Sergio Perez             | Red Bull Racing                                 |
+| Lando Norris             | McLaren                                         |
+| Daniel Ricciardo         | McLaren                                         |
+| Lewis Hamilton           | Mercedes                                        |
+| Valtteri Bottas          | Mercedes                                        |
+| Charles Leclerc          | Ferrari                                         |
+| Carlos Sainz Jr.         | Ferrari                                         |
+| Fernando Alonso          | Alpine Renault                                  |
+| Esteban Ocon             | Alpine Renault                                  |
+| Pierre Gasly             | Alpha Tauri                                     |
+| Yuki Tsunoda             | Alpha Tauri                                     |
+| Sebastian Vettel         | Aston Martin                                    |
+| Lance Stroll             | Aston Martin                                    |
+| Kimi Räikkönen           | Alfa Romeo                                      |
+| Antonio Giovinazzi       | Alfa Romeo                                      |
+| Mick Schumacher          | Haas                                            |
+| Nikita Mazepin           | Haas                                            |
+| George Russell           | Williams                                        |
+| Nicholas Latifi          | Williams                                        |
+
+
+
+Table: (\#tab:points) Formula 1 Points System
+
+| Position             | Points                                          |
+|----------------------|-------------------------------------------------|
+| 1st                  | 25                                              |
+| 2nd                  | 18                                              |
+| 3rd                  | 15                                              |
+| 4th                  | 12                                              |
+| 5th                  | 10                                              |
+| 6th                  | 8                                               |
+| 7th                  | 6                                               |
+| 8th                  | 4                                               |
+| 9th                  | 2                                               |
+| 10th                 | 1                                               |
+
+
+
+
+```{r tab3, echo=FALSE}
+  final_standings_2021 <- getFinalF1Standings(2021, type = "driver")
+  clean_names(final_standings_2021) |>
+    select(position,driver_id, points)|>
+    mutate(driver_id = 
+             recode(driver_id,
+                    "max_verstappen" = "Max Verstappen",
+                    "hamilton" = "Lewis Hamilton",
+                    "bottas" = "Valtteri Bottas",
+                    "perez" = "Sergio Perez",
+                    "sainz" = "Carlos Sainz Jr.",
+                    "norris" = "Lando Norris",
+                    "leclerc" = "Charles Leclerc",
+                    "ricciardo" = "Daniel Ricciardo",
+                    "gasly" = "Pierre Gasly",
+                    "alonso"= "Fernando Alonso",
+                    "ocon" = "Esteban Ocon",
+                    "vettel" = "Sebastian Vettel",
+                    "stroll" = "Lance Stroll",
+                    "tsunoda" = "Yuki Tsunoda",
+                    "russell" = "George Russell",
+                    "raikkonen" = "Kimi Räikkönen",
+                    "latifi" = "Nicholas Latifi",
+                    "giovinazzi" = "Antonio Giovinazzi",
+                    "mick_schumacher" = "Mick Schumacher",
+                    "kubica" = "Robert Kubica",
+                    "mazepin" = "Nikita Mazepin"
+                    )
+                )|>
+      kable(caption = "Driver Standings at the end of the 2021 Formula 1 World Drivers Championship",
+            col.names = c("Position", "Driver", "Points"),
+            digits = 5,
+            booktabs = TRUE, 
+            linesep = "")
+   
+```
+
+## Race Winners
+The 2021 season saw six different race winners, as seen in Figure \@ref(fig:fig1). Max Verstappen won the most races, winning 10 of the 22. Lewis Hamilton won 8. Valtteri Bottas, Sergio Perez, Esteban Ocon and Daniel Ricciardo each won one race.
+
+
+```{r fig1, echo=FALSE, fig.cap = "Number of race wins for each driver in the 2021 Formula 1 season"}
+    
+   final_standings_2021 <- getFinalF1Standings(2021, type = "driver")
+    clean_names(final_standings_2021) |>
+    select(driver_id, wins)|>
+      mutate(driver_id = 
+             recode(driver_id,
+                    "max_verstappen" = "Max Verstappen",
+                    "hamilton" = "Lewis Hamilton",
+                    "bottas" = "Valtteri Bottas",
+                    "perez" = "Sergio Perez",
+                    "sainz" = "Carlos Sainz Jr.",
+                    "norris" = "Lando Norris",
+                    "leclerc" = "Charles Leclerc",
+                    "ricciardo" = "Daniel Ricciardo",
+                    "gasly" = "Pierre Gasly",
+                    "alonso"= "Fernando Alonso",
+                    "ocon" = "Esteban Ocon",
+                    "vettel" = "Sebastian Vettel",
+                    "stroll" = "Lance Stroll",
+                    "tsunoda" = "Yuki Tsunoda",
+                    "russell" = "George Russell",
+                    "raikkonen" = "Kimi Räikkönen",
+                    "latifi" = "Nicholas Latifi",
+                    "giovinazzi" = "Antonio Giovinazzi",
+                    "mick_schumacher" = "Mick Schumacher",
+                    "kubica" = "Robert Kubica",
+                    "mazepin" = "Nikita Mazepin"
+                    )
+                 )|>
+        ggplot(aes(x = wins, y =  driver_id)) + geom_bar(stat = "identity") + labs(x = "Number of Race Wins", y = "Driver")
+
+```
+
+```{r podium_cleaning, include=FALSE}
+bah_podium <- 
+  getRaceResults(2021,1) |>
+  select(driverId, position) |>
+  filter(position < 4)|>
+  mutate(driverId = 
+             recode(driverId,
+                    "max_verstappen" = "Max Verstappen",
+                    "hamilton" = "Lewis Hamilton",
+                    "bottas" = "Valtteri Bottas",
+                    "perez" = "Sergio Perez",
+                    "sainz" = "Carlos Sainz Jr.",
+                    "norris" = "Lando Norris",
+                    "leclerc" = "Charles Leclerc",
+                    "ricciardo" = "Daniel Ricciardo",
+                    "gasly" = "Pierre Gasly",
+                    "alonso"= "Fernando Alonso",
+                    "ocon" = "Esteban Ocon",
+                    "vettel" = "Sebastian Vettel",
+                    "stroll" = "Lance Stroll",
+                    "tsunoda" = "Yuki Tsunoda",
+                    "russell" = "George Russell",
+                    "raikkonen" = "Kimi Räikkönen",
+                    "latifi" = "Nicholas Latifi",
+                    "giovinazzi" = "Antonio Giovinazzi",
+                    "mick_schumacher" = "Mick Schumacher",
+                    "kubica" = "Robert Kubica",
+                    "mazepin" = "Nikita Mazepin"
+                    )
+                 )
+    
+
+imo_podium <- getRaceResults(2021,2) |>
+    select(driverId, position) |>
+  filter(position < 4)|>
+  mutate(driverId = 
+             recode(driverId,
+                    "max_verstappen" = "Max Verstappen",
+                    "hamilton" = "Lewis Hamilton",
+                    "bottas" = "Valtteri Bottas",
+                    "perez" = "Sergio Perez",
+                    "sainz" = "Carlos Sainz Jr.",
+                    "norris" = "Lando Norris",
+                    "leclerc" = "Charles Leclerc",
+                    "ricciardo" = "Daniel Ricciardo",
+                    "gasly" = "Pierre Gasly",
+                    "alonso"= "Fernando Alonso",
+                    "ocon" = "Esteban Ocon",
+                    "vettel" = "Sebastian Vettel",
+                    "stroll" = "Lance Stroll",
+                    "tsunoda" = "Yuki Tsunoda",
+                    "russell" = "George Russell",
+                    "raikkonen" = "Kimi Räikkönen",
+                    "latifi" = "Nicholas Latifi",
+                    "giovinazzi" = "Antonio Giovinazzi",
+                    "mick_schumacher" = "Mick Schumacher",
+                    "kubica" = "Robert Kubica",
+                    "mazepin" = "Nikita Mazepin"
+                    )
+                 )
+
+por_podium <- getRaceResults(2021,3) |>
+     select(driverId, position) |>
+  filter(position < 4)|>
+  mutate(driverId = 
+             recode(driverId,
+                    "max_verstappen" = "Max Verstappen",
+                    "hamilton" = "Lewis Hamilton",
+                    "bottas" = "Valtteri Bottas",
+                    "perez" = "Sergio Perez",
+                    "sainz" = "Carlos Sainz Jr.",
+                    "norris" = "Lando Norris",
+                    "leclerc" = "Charles Leclerc",
+                    "ricciardo" = "Daniel Ricciardo",
+                    "gasly" = "Pierre Gasly",
+                    "alonso"= "Fernando Alonso",
+                    "ocon" = "Esteban Ocon",
+                    "vettel" = "Sebastian Vettel",
+                    "stroll" = "Lance Stroll",
+                    "tsunoda" = "Yuki Tsunoda",
+                    "russell" = "George Russell",
+                    "raikkonen" = "Kimi Räikkönen",
+                    "latifi" = "Nicholas Latifi",
+                    "giovinazzi" = "Antonio Giovinazzi",
+                    "mick_schumacher" = "Mick Schumacher",
+                    "kubica" = "Robert Kubica",
+                    "mazepin" = "Nikita Mazepin"
+                    )
+                 )
+
+spa_podium <- getRaceResults(2021,4) |>
+     select(driverId, position) |>
+  filter(position < 4)|>
+  mutate(driverId = 
+             recode(driverId,
+                    "max_verstappen" = "Max Verstappen",
+                    "hamilton" = "Lewis Hamilton",
+                    "bottas" = "Valtteri Bottas",
+                    "perez" = "Sergio Perez",
+                    "sainz" = "Carlos Sainz Jr.",
+                    "norris" = "Lando Norris",
+                    "leclerc" = "Charles Leclerc",
+                    "ricciardo" = "Daniel Ricciardo",
+                    "gasly" = "Pierre Gasly",
+                    "alonso"= "Fernando Alonso",
+                    "ocon" = "Esteban Ocon",
+                    "vettel" = "Sebastian Vettel",
+                    "stroll" = "Lance Stroll",
+                    "tsunoda" = "Yuki Tsunoda",
+                    "russell" = "George Russell",
+                    "raikkonen" = "Kimi Räikkönen",
+                    "latifi" = "Nicholas Latifi",
+                    "giovinazzi" = "Antonio Giovinazzi",
+                    "mick_schumacher" = "Mick Schumacher",
+                    "kubica" = "Robert Kubica",
+                    "mazepin" = "Nikita Mazepin"
+                    )
+                 )
+
+mon_podium <- getRaceResults(2021,5) |>
+     select(driverId, position) |>
+  filter(position < 4)|>
+  mutate(driverId = 
+             recode(driverId,
+                    "max_verstappen" = "Max Verstappen",
+                    "hamilton" = "Lewis Hamilton",
+                    "bottas" = "Valtteri Bottas",
+                    "perez" = "Sergio Perez",
+                    "sainz" = "Carlos Sainz Jr.",
+                    "norris" = "Lando Norris",
+                    "leclerc" = "Charles Leclerc",
+                    "ricciardo" = "Daniel Ricciardo",
+                    "gasly" = "Pierre Gasly",
+                    "alonso"= "Fernando Alonso",
+                    "ocon" = "Esteban Ocon",
+                    "vettel" = "Sebastian Vettel",
+                    "stroll" = "Lance Stroll",
+                    "tsunoda" = "Yuki Tsunoda",
+                    "russell" = "George Russell",
+                    "raikkonen" = "Kimi Räikkönen",
+                    "latifi" = "Nicholas Latifi",
+                    "giovinazzi" = "Antonio Giovinazzi",
+                    "mick_schumacher" = "Mick Schumacher",
+                    "kubica" = "Robert Kubica",
+                    "mazepin" = "Nikita Mazepin"
+                    )
+                 )
+
+bak_podium <- getRaceResults(2021,6) |>
+     select(driverId, position) |>
+  filter(position < 4)|>
+  mutate(driverId = 
+             recode(driverId,
+                    "max_verstappen" = "Max Verstappen",
+                    "hamilton" = "Lewis Hamilton",
+                    "bottas" = "Valtteri Bottas",
+                    "perez" = "Sergio Perez",
+                    "sainz" = "Carlos Sainz Jr.",
+                    "norris" = "Lando Norris",
+                    "leclerc" = "Charles Leclerc",
+                    "ricciardo" = "Daniel Ricciardo",
+                    "gasly" = "Pierre Gasly",
+                    "alonso"= "Fernando Alonso",
+                    "ocon" = "Esteban Ocon",
+                    "vettel" = "Sebastian Vettel",
+                    "stroll" = "Lance Stroll",
+                    "tsunoda" = "Yuki Tsunoda",
+                    "russell" = "George Russell",
+                    "raikkonen" = "Kimi Räikkönen",
+                    "latifi" = "Nicholas Latifi",
+                    "giovinazzi" = "Antonio Giovinazzi",
+                    "mick_schumacher" = "Mick Schumacher",
+                    "kubica" = "Robert Kubica",
+                    "mazepin" = "Nikita Mazepin"
+                    )
+                 )
+
+fra_podium <- getRaceResults(2021,7) |>
+     select(driverId, position) |>
+  filter(position < 4)|>
+  mutate(driverId = 
+             recode(driverId,
+                    "max_verstappen" = "Max Verstappen",
+                    "hamilton" = "Lewis Hamilton",
+                    "bottas" = "Valtteri Bottas",
+                    "perez" = "Sergio Perez",
+                    "sainz" = "Carlos Sainz Jr.",
+                    "norris" = "Lando Norris",
+                    "leclerc" = "Charles Leclerc",
+                    "ricciardo" = "Daniel Ricciardo",
+                    "gasly" = "Pierre Gasly",
+                    "alonso"= "Fernando Alonso",
+                    "ocon" = "Esteban Ocon",
+                    "vettel" = "Sebastian Vettel",
+                    "stroll" = "Lance Stroll",
+                    "tsunoda" = "Yuki Tsunoda",
+                    "russell" = "George Russell",
+                    "raikkonen" = "Kimi Räikkönen",
+                    "latifi" = "Nicholas Latifi",
+                    "giovinazzi" = "Antonio Giovinazzi",
+                    "mick_schumacher" = "Mick Schumacher",
+                    "kubica" = "Robert Kubica",
+                    "mazepin" = "Nikita Mazepin"
+                    )
+                 )
+
+sty_podium <- getRaceResults(2021,8) |>
+     select(driverId, position) |>
+  filter(position < 4)|>
+  mutate(driverId = 
+             recode(driverId,
+                    "max_verstappen" = "Max Verstappen",
+                    "hamilton" = "Lewis Hamilton",
+                    "bottas" = "Valtteri Bottas",
+                    "perez" = "Sergio Perez",
+                    "sainz" = "Carlos Sainz Jr.",
+                    "norris" = "Lando Norris",
+                    "leclerc" = "Charles Leclerc",
+                    "ricciardo" = "Daniel Ricciardo",
+                    "gasly" = "Pierre Gasly",
+                    "alonso"= "Fernando Alonso",
+                    "ocon" = "Esteban Ocon",
+                    "vettel" = "Sebastian Vettel",
+                    "stroll" = "Lance Stroll",
+                    "tsunoda" = "Yuki Tsunoda",
+                    "russell" = "George Russell",
+                    "raikkonen" = "Kimi Räikkönen",
+                    "latifi" = "Nicholas Latifi",
+                    "giovinazzi" = "Antonio Giovinazzi",
+                    "mick_schumacher" = "Mick Schumacher",
+                    "kubica" = "Robert Kubica",
+                    "mazepin" = "Nikita Mazepin"
+                    )
+                 )
+
+aus_podium <- getRaceResults(2021,9) |>
+     select(driverId, position) |>
+  filter(position < 4)|>
+  mutate(driverId = 
+             recode(driverId,
+                    "max_verstappen" = "Max Verstappen",
+                    "hamilton" = "Lewis Hamilton",
+                    "bottas" = "Valtteri Bottas",
+                    "perez" = "Sergio Perez",
+                    "sainz" = "Carlos Sainz Jr.",
+                    "norris" = "Lando Norris",
+                    "leclerc" = "Charles Leclerc",
+                    "ricciardo" = "Daniel Ricciardo",
+                    "gasly" = "Pierre Gasly",
+                    "alonso"= "Fernando Alonso",
+                    "ocon" = "Esteban Ocon",
+                    "vettel" = "Sebastian Vettel",
+                    "stroll" = "Lance Stroll",
+                    "tsunoda" = "Yuki Tsunoda",
+                    "russell" = "George Russell",
+                    "raikkonen" = "Kimi Räikkönen",
+                    "latifi" = "Nicholas Latifi",
+                    "giovinazzi" = "Antonio Giovinazzi",
+                    "mick_schumacher" = "Mick Schumacher",
+                    "kubica" = "Robert Kubica",
+                    "mazepin" = "Nikita Mazepin"
+                    )
+                 )
+
+bri_podium <- getRaceResults(2021,10) |>
+     select(driverId, position) |>
+  filter(position < 4)|>
+  mutate(driverId = 
+             recode(driverId,
+                    "max_verstappen" = "Max Verstappen",
+                    "hamilton" = "Lewis Hamilton",
+                    "bottas" = "Valtteri Bottas",
+                    "perez" = "Sergio Perez",
+                    "sainz" = "Carlos Sainz Jr.",
+                    "norris" = "Lando Norris",
+                    "leclerc" = "Charles Leclerc",
+                    "ricciardo" = "Daniel Ricciardo",
+                    "gasly" = "Pierre Gasly",
+                    "alonso"= "Fernando Alonso",
+                    "ocon" = "Esteban Ocon",
+                    "vettel" = "Sebastian Vettel",
+                    "stroll" = "Lance Stroll",
+                    "tsunoda" = "Yuki Tsunoda",
+                    "russell" = "George Russell",
+                    "raikkonen" = "Kimi Räikkönen",
+                    "latifi" = "Nicholas Latifi",
+                    "giovinazzi" = "Antonio Giovinazzi",
+                    "mick_schumacher" = "Mick Schumacher",
+                    "kubica" = "Robert Kubica",
+                    "mazepin" = "Nikita Mazepin"
+                    )
+                 )
+
+hun_podium <- getRaceResults(2021,11) |>
+     select(driverId, position) |>
+  filter(position < 4)|>
+  mutate(driverId = 
+             recode(driverId,
+                    "max_verstappen" = "Max Verstappen",
+                    "hamilton" = "Lewis Hamilton",
+                    "bottas" = "Valtteri Bottas",
+                    "perez" = "Sergio Perez",
+                    "sainz" = "Carlos Sainz Jr.",
+                    "norris" = "Lando Norris",
+                    "leclerc" = "Charles Leclerc",
+                    "ricciardo" = "Daniel Ricciardo",
+                    "gasly" = "Pierre Gasly",
+                    "alonso"= "Fernando Alonso",
+                    "ocon" = "Esteban Ocon",
+                    "vettel" = "Sebastian Vettel",
+                    "stroll" = "Lance Stroll",
+                    "tsunoda" = "Yuki Tsunoda",
+                    "russell" = "George Russell",
+                    "raikkonen" = "Kimi Räikkönen",
+                    "latifi" = "Nicholas Latifi",
+                    "giovinazzi" = "Antonio Giovinazzi",
+                    "mick_schumacher" = "Mick Schumacher",
+                    "kubica" = "Robert Kubica",
+                    "mazepin" = "Nikita Mazepin"
+                    )
+                 )
+
+bel_podium <- getRaceResults(2021,12) |>
+    select(driverId, position) |>
+  filter(position < 4)|>
+  mutate(driverId = 
+             recode(driverId,
+                    "max_verstappen" = "Max Verstappen",
+                    "hamilton" = "Lewis Hamilton",
+                    "bottas" = "Valtteri Bottas",
+                    "perez" = "Sergio Perez",
+                    "sainz" = "Carlos Sainz Jr.",
+                    "norris" = "Lando Norris",
+                    "leclerc" = "Charles Leclerc",
+                    "ricciardo" = "Daniel Ricciardo",
+                    "gasly" = "Pierre Gasly",
+                    "alonso"= "Fernando Alonso",
+                    "ocon" = "Esteban Ocon",
+                    "vettel" = "Sebastian Vettel",
+                    "stroll" = "Lance Stroll",
+                    "tsunoda" = "Yuki Tsunoda",
+                    "russell" = "George Russell",
+                    "raikkonen" = "Kimi Räikkönen",
+                    "latifi" = "Nicholas Latifi",
+                    "giovinazzi" = "Antonio Giovinazzi",
+                    "mick_schumacher" = "Mick Schumacher",
+                    "kubica" = "Robert Kubica",
+                    "mazepin" = "Nikita Mazepin"
+                    )
+                 )
+
+ned_podium <- getRaceResults(2021,13) |>
+     select(driverId, position) |>
+  filter(position < 4)|>
+  mutate(driverId = 
+             recode(driverId,
+                    "max_verstappen" = "Max Verstappen",
+                    "hamilton" = "Lewis Hamilton",
+                    "bottas" = "Valtteri Bottas",
+                    "perez" = "Sergio Perez",
+                    "sainz" = "Carlos Sainz Jr.",
+                    "norris" = "Lando Norris",
+                    "leclerc" = "Charles Leclerc",
+                    "ricciardo" = "Daniel Ricciardo",
+                    "gasly" = "Pierre Gasly",
+                    "alonso"= "Fernando Alonso",
+                    "ocon" = "Esteban Ocon",
+                    "vettel" = "Sebastian Vettel",
+                    "stroll" = "Lance Stroll",
+                    "tsunoda" = "Yuki Tsunoda",
+                    "russell" = "George Russell",
+                    "raikkonen" = "Kimi Räikkönen",
+                    "latifi" = "Nicholas Latifi",
+                    "giovinazzi" = "Antonio Giovinazzi",
+                    "mick_schumacher" = "Mick Schumacher",
+                    "kubica" = "Robert Kubica",
+                    "mazepin" = "Nikita Mazepin"
+                    )
+                 )
+
+ita_podium <- getRaceResults(2021,14) |>
+     select(driverId, position) |>
+  filter(position < 4)|>
+  mutate(driverId = 
+             recode(driverId,
+                    "max_verstappen" = "Max Verstappen",
+                    "hamilton" = "Lewis Hamilton",
+                    "bottas" = "Valtteri Bottas",
+                    "perez" = "Sergio Perez",
+                    "sainz" = "Carlos Sainz Jr.",
+                    "norris" = "Lando Norris",
+                    "leclerc" = "Charles Leclerc",
+                    "ricciardo" = "Daniel Ricciardo",
+                    "gasly" = "Pierre Gasly",
+                    "alonso"= "Fernando Alonso",
+                    "ocon" = "Esteban Ocon",
+                    "vettel" = "Sebastian Vettel",
+                    "stroll" = "Lance Stroll",
+                    "tsunoda" = "Yuki Tsunoda",
+                    "russell" = "George Russell",
+                    "raikkonen" = "Kimi Räikkönen",
+                    "latifi" = "Nicholas Latifi",
+                    "giovinazzi" = "Antonio Giovinazzi",
+                    "mick_schumacher" = "Mick Schumacher",
+                    "kubica" = "Robert Kubica",
+                    "mazepin" = "Nikita Mazepin"
+                    )
+                 )
+
+rus_podium <- getRaceResults(2021,15) |>
+     select(driverId, position) |>
+  filter(position < 4)|>
+  mutate(driverId = 
+             recode(driverId,
+                    "max_verstappen" = "Max Verstappen",
+                    "hamilton" = "Lewis Hamilton",
+                    "bottas" = "Valtteri Bottas",
+                    "perez" = "Sergio Perez",
+                    "sainz" = "Carlos Sainz Jr.",
+                    "norris" = "Lando Norris",
+                    "leclerc" = "Charles Leclerc",
+                    "ricciardo" = "Daniel Ricciardo",
+                    "gasly" = "Pierre Gasly",
+                    "alonso"= "Fernando Alonso",
+                    "ocon" = "Esteban Ocon",
+                    "vettel" = "Sebastian Vettel",
+                    "stroll" = "Lance Stroll",
+                    "tsunoda" = "Yuki Tsunoda",
+                    "russell" = "George Russell",
+                    "raikkonen" = "Kimi Räikkönen",
+                    "latifi" = "Nicholas Latifi",
+                    "giovinazzi" = "Antonio Giovinazzi",
+                    "mick_schumacher" = "Mick Schumacher",
+                    "kubica" = "Robert Kubica",
+                    "mazepin" = "Nikita Mazepin"
+                    )
+                 )
+
+tur_podium <- getRaceResults(2021,16) |>
+     select(driverId, position) |>
+  filter(position < 4)|>
+  mutate(driverId = 
+             recode(driverId,
+                    "max_verstappen" = "Max Verstappen",
+                    "hamilton" = "Lewis Hamilton",
+                    "bottas" = "Valtteri Bottas",
+                    "perez" = "Sergio Perez",
+                    "sainz" = "Carlos Sainz Jr.",
+                    "norris" = "Lando Norris",
+                    "leclerc" = "Charles Leclerc",
+                    "ricciardo" = "Daniel Ricciardo",
+                    "gasly" = "Pierre Gasly",
+                    "alonso"= "Fernando Alonso",
+                    "ocon" = "Esteban Ocon",
+                    "vettel" = "Sebastian Vettel",
+                    "stroll" = "Lance Stroll",
+                    "tsunoda" = "Yuki Tsunoda",
+                    "russell" = "George Russell",
+                    "raikkonen" = "Kimi Räikkönen",
+                    "latifi" = "Nicholas Latifi",
+                    "giovinazzi" = "Antonio Giovinazzi",
+                    "mick_schumacher" = "Mick Schumacher",
+                    "kubica" = "Robert Kubica",
+                    "mazepin" = "Nikita Mazepin"
+                    )
+                 )
+
+usa_podium <- getRaceResults(2021,17) |>
+     select(driverId, position) |>
+  filter(position < 4)|>
+  mutate(driverId = 
+             recode(driverId,
+                    "max_verstappen" = "Max Verstappen",
+                    "hamilton" = "Lewis Hamilton",
+                    "bottas" = "Valtteri Bottas",
+                    "perez" = "Sergio Perez",
+                    "sainz" = "Carlos Sainz Jr.",
+                    "norris" = "Lando Norris",
+                    "leclerc" = "Charles Leclerc",
+                    "ricciardo" = "Daniel Ricciardo",
+                    "gasly" = "Pierre Gasly",
+                    "alonso"= "Fernando Alonso",
+                    "ocon" = "Esteban Ocon",
+                    "vettel" = "Sebastian Vettel",
+                    "stroll" = "Lance Stroll",
+                    "tsunoda" = "Yuki Tsunoda",
+                    "russell" = "George Russell",
+                    "raikkonen" = "Kimi Räikkönen",
+                    "latifi" = "Nicholas Latifi",
+                    "giovinazzi" = "Antonio Giovinazzi",
+                    "mick_schumacher" = "Mick Schumacher",
+                    "kubica" = "Robert Kubica",
+                    "mazepin" = "Nikita Mazepin"
+                    )
+                 )
+
+mex_podium <- getRaceResults(2021,18) |>
+     select(driverId, position) |>
+  filter(position < 4)|>
+  mutate(driverId = 
+             recode(driverId,
+                    "max_verstappen" = "Max Verstappen",
+                    "hamilton" = "Lewis Hamilton",
+                    "bottas" = "Valtteri Bottas",
+                    "perez" = "Sergio Perez",
+                    "sainz" = "Carlos Sainz Jr.",
+                    "norris" = "Lando Norris",
+                    "leclerc" = "Charles Leclerc",
+                    "ricciardo" = "Daniel Ricciardo",
+                    "gasly" = "Pierre Gasly",
+                    "alonso"= "Fernando Alonso",
+                    "ocon" = "Esteban Ocon",
+                    "vettel" = "Sebastian Vettel",
+                    "stroll" = "Lance Stroll",
+                    "tsunoda" = "Yuki Tsunoda",
+                    "russell" = "George Russell",
+                    "raikkonen" = "Kimi Räikkönen",
+                    "latifi" = "Nicholas Latifi",
+                    "giovinazzi" = "Antonio Giovinazzi",
+                    "mick_schumacher" = "Mick Schumacher",
+                    "kubica" = "Robert Kubica",
+                    "mazepin" = "Nikita Mazepin"
+                    )
+                 )
+
+bra_podium <- getRaceResults(2021,19) |>
+     select(driverId, position) |>
+  filter(position < 4)|>
+  mutate(driverId = 
+             recode(driverId,
+                    "max_verstappen" = "Max Verstappen",
+                    "hamilton" = "Lewis Hamilton",
+                    "bottas" = "Valtteri Bottas",
+                    "perez" = "Sergio Perez",
+                    "sainz" = "Carlos Sainz Jr.",
+                    "norris" = "Lando Norris",
+                    "leclerc" = "Charles Leclerc",
+                    "ricciardo" = "Daniel Ricciardo",
+                    "gasly" = "Pierre Gasly",
+                    "alonso"= "Fernando Alonso",
+                    "ocon" = "Esteban Ocon",
+                    "vettel" = "Sebastian Vettel",
+                    "stroll" = "Lance Stroll",
+                    "tsunoda" = "Yuki Tsunoda",
+                    "russell" = "George Russell",
+                    "raikkonen" = "Kimi Räikkönen",
+                    "latifi" = "Nicholas Latifi",
+                    "giovinazzi" = "Antonio Giovinazzi",
+                    "mick_schumacher" = "Mick Schumacher",
+                    "kubica" = "Robert Kubica",
+                    "mazepin" = "Nikita Mazepin"
+                    )
+                 )
+
+qat_podium <- getRaceResults(2021,20) |>
+     select(driverId, position) |>
+  filter(position < 4)|>
+  mutate(driverId = 
+             recode(driverId,
+                    "max_verstappen" = "Max Verstappen",
+                    "hamilton" = "Lewis Hamilton",
+                    "bottas" = "Valtteri Bottas",
+                    "perez" = "Sergio Perez",
+                    "sainz" = "Carlos Sainz Jr.",
+                    "norris" = "Lando Norris",
+                    "leclerc" = "Charles Leclerc",
+                    "ricciardo" = "Daniel Ricciardo",
+                    "gasly" = "Pierre Gasly",
+                    "alonso"= "Fernando Alonso",
+                    "ocon" = "Esteban Ocon",
+                    "vettel" = "Sebastian Vettel",
+                    "stroll" = "Lance Stroll",
+                    "tsunoda" = "Yuki Tsunoda",
+                    "russell" = "George Russell",
+                    "raikkonen" = "Kimi Räikkönen",
+                    "latifi" = "Nicholas Latifi",
+                    "giovinazzi" = "Antonio Giovinazzi",
+                    "mick_schumacher" = "Mick Schumacher",
+                    "kubica" = "Robert Kubica",
+                    "mazepin" = "Nikita Mazepin"
+                    )
+                 )
+
+ksa_podium <- getRaceResults(2021,21) |>
+     select(driverId, position) |>
+  filter(position < 4)|>
+  mutate(driverId = 
+             recode(driverId,
+                    "max_verstappen" = "Max Verstappen",
+                    "hamilton" = "Lewis Hamilton",
+                    "bottas" = "Valtteri Bottas",
+                    "perez" = "Sergio Perez",
+                    "sainz" = "Carlos Sainz Jr.",
+                    "norris" = "Lando Norris",
+                    "leclerc" = "Charles Leclerc",
+                    "ricciardo" = "Daniel Ricciardo",
+                    "gasly" = "Pierre Gasly",
+                    "alonso"= "Fernando Alonso",
+                    "ocon" = "Esteban Ocon",
+                    "vettel" = "Sebastian Vettel",
+                    "stroll" = "Lance Stroll",
+                    "tsunoda" = "Yuki Tsunoda",
+                    "russell" = "George Russell",
+                    "raikkonen" = "Kimi Räikkönen",
+                    "latifi" = "Nicholas Latifi",
+                    "giovinazzi" = "Antonio Giovinazzi",
+                    "mick_schumacher" = "Mick Schumacher",
+                    "kubica" = "Robert Kubica",
+                    "mazepin" = "Nikita Mazepin"
+                    )
+                 )
+
+abu_podium <- getRaceResults(2021,22) |>
+     select(driverId, position) |>
+  filter(position < 4)|>
+  mutate(driverId = 
+             recode(driverId,
+                    "max_verstappen" = "Max Verstappen",
+                    "hamilton" = "Lewis Hamilton",
+                    "bottas" = "Valtteri Bottas",
+                    "perez" = "Sergio Perez",
+                    "sainz" = "Carlos Sainz Jr.",
+                    "norris" = "Lando Norris",
+                    "leclerc" = "Charles Leclerc",
+                    "ricciardo" = "Daniel Ricciardo",
+                    "gasly" = "Pierre Gasly",
+                    "alonso"= "Fernando Alonso",
+                    "ocon" = "Esteban Ocon",
+                    "vettel" = "Sebastian Vettel",
+                    "stroll" = "Lance Stroll",
+                    "tsunoda" = "Yuki Tsunoda",
+                    "russell" = "George Russell",
+                    "raikkonen" = "Kimi Räikkönen",
+                    "latifi" = "Nicholas Latifi",
+                    "giovinazzi" = "Antonio Giovinazzi",
+                    "mick_schumacher" = "Mick Schumacher",
+                    "kubica" = "Robert Kubica",
+                    "mazepin" = "Nikita Mazepin"
+                    )
+                 )
+
+
+  
+```
+
+## Podiums
+As seen in Figure \@ref(fig:fig2), the 2021 season saw 12 different podium sitters. Max Verstappen had the most, with 18. Coming in at second, Lewis Hamilton finished on the podium at 17 races. Valtteri Bottas had 11. Sergio Perez finished the season with 5 podiums. Lando Norris and Carlos Sainz Jr. each stepped on the podium 4 times.Daniel Ricciardo, Sebastian Vettel, Charles Leclerc, Fernando Alonso, Pierre Gasly, Esteban Ocon and George Russell each stepped on the podium one time.
+
+```{r fig2, echo=FALSE, fig.cap = "Total number of podiums amongst podium finishers in the 2021 Formula 1 season"}
+podiums <- bind_rows (bah_podium, imo_podium, por_podium, spa_podium, mon_podium, bak_podium, fra_podium, sty_podium, aus_podium, bri_podium, hun_podium, bel_podium, ned_podium, ita_podium, rus_podium, tur_podium, usa_podium, mex_podium, bra_podium, qat_podium, ksa_podium, abu_podium)|>
+count(vars = driverId) 
+
+podiums|>
+   ggplot(aes(x = n, y =  vars)) + geom_bar(stat = "identity") + labs(x = "Number of Podiums", y = "Driver") 
+```
+
+
+
+## Pole Positions 
+
+As seen in Figure \@ref(fig:fig3), the 2021 season saw five different pole sitters. Max Verstappen and Lewis Hamilton both qualified P1 at eight different occasions. Valtteri Bottas had three pole positions. Charles Leclerc qualified P1 twice. Lando Norris achieved pole position once.
+
+```{r quali_clean, include=FALSE}
+
+bah_quali <- getQualifyingResults(2021,1) |>
+  select(position, driverId) |>
+  filter(position == 1 )|>
+  mutate(driverId = 
+             recode(driverId,
+                    "max_verstappen" = "Max Verstappen",
+                    "hamilton" = "Lewis Hamilton",
+                    "bottas" = "Valtteri Bottas",
+                    "perez" = "Sergio Perez",
+                    "sainz" = "Carlos Sainz Jr.",
+                    "norris" = "Lando Norris",
+                    "leclerc" = "Charles Leclerc",
+                    "ricciardo" = "Daniel Ricciardo",
+                    "gasly" = "Pierre Gasly",
+                    "alonso"= "Fernando Alonso",
+                    "ocon" = "Esteban Ocon",
+                    "vettel" = "Sebastian Vettel",
+                    "stroll" = "Lance Stroll",
+                    "tsunoda" = "Yuki Tsunoda",
+                    "russell" = "George Russell",
+                    "raikkonen" = "Kimi Räikkönen",
+                    "latifi" = "Nicholas Latifi",
+                    "giovinazzi" = "Antonio Giovinazzi",
+                    "mick_schumacher" = "Mick Schumacher",
+                    "kubica" = "Robert Kubica",
+                    "mazepin" = "Nikita Mazepin"
+                    )
+                 )
+
+imo_quali <- getQualifyingResults(2021,2) |>
+  select(position, driverId) |>
+  filter(position == 1 )|>
+  mutate(driverId = 
+             recode(driverId,
+                    "max_verstappen" = "Max Verstappen",
+                    "hamilton" = "Lewis Hamilton",
+                    "bottas" = "Valtteri Bottas",
+                    "perez" = "Sergio Perez",
+                    "sainz" = "Carlos Sainz Jr.",
+                    "norris" = "Lando Norris",
+                    "leclerc" = "Charles Leclerc",
+                    "ricciardo" = "Daniel Ricciardo",
+                    "gasly" = "Pierre Gasly",
+                    "alonso"= "Fernando Alonso",
+                    "ocon" = "Esteban Ocon",
+                    "vettel" = "Sebastian Vettel",
+                    "stroll" = "Lance Stroll",
+                    "tsunoda" = "Yuki Tsunoda",
+                    "russell" = "George Russell",
+                    "raikkonen" = "Kimi Räikkönen",
+                    "latifi" = "Nicholas Latifi",
+                    "giovinazzi" = "Antonio Giovinazzi",
+                    "mick_schumacher" = "Mick Schumacher",
+                    "kubica" = "Robert Kubica",
+                    "mazepin" = "Nikita Mazepin"
+                    )
+                 )
+
+por_quali <- getQualifyingResults(2021,3) |>
+  select(position, driverId) |>
+  filter(position == 1 )|>
+  mutate(driverId = 
+             recode(driverId,
+                    "max_verstappen" = "Max Verstappen",
+                    "hamilton" = "Lewis Hamilton",
+                    "bottas" = "Valtteri Bottas",
+                    "perez" = "Sergio Perez",
+                    "sainz" = "Carlos Sainz Jr.",
+                    "norris" = "Lando Norris",
+                    "leclerc" = "Charles Leclerc",
+                    "ricciardo" = "Daniel Ricciardo",
+                    "gasly" = "Pierre Gasly",
+                    "alonso"= "Fernando Alonso",
+                    "ocon" = "Esteban Ocon",
+                    "vettel" = "Sebastian Vettel",
+                    "stroll" = "Lance Stroll",
+                    "tsunoda" = "Yuki Tsunoda",
+                    "russell" = "George Russell",
+                    "raikkonen" = "Kimi Räikkönen",
+                    "latifi" = "Nicholas Latifi",
+                    "giovinazzi" = "Antonio Giovinazzi",
+                    "mick_schumacher" = "Mick Schumacher",
+                    "kubica" = "Robert Kubica",
+                    "mazepin" = "Nikita Mazepin"
+                    )
+                 )
+
+spa_quali <- getQualifyingResults(2021,4) |>
+  select(position, driverId) |>
+  filter(position == 1 )|>
+  mutate(driverId = 
+             recode(driverId,
+                    "max_verstappen" = "Max Verstappen",
+                    "hamilton" = "Lewis Hamilton",
+                    "bottas" = "Valtteri Bottas",
+                    "perez" = "Sergio Perez",
+                    "sainz" = "Carlos Sainz Jr.",
+                    "norris" = "Lando Norris",
+                    "leclerc" = "Charles Leclerc",
+                    "ricciardo" = "Daniel Ricciardo",
+                    "gasly" = "Pierre Gasly",
+                    "alonso"= "Fernando Alonso",
+                    "ocon" = "Esteban Ocon",
+                    "vettel" = "Sebastian Vettel",
+                    "stroll" = "Lance Stroll",
+                    "tsunoda" = "Yuki Tsunoda",
+                    "russell" = "George Russell",
+                    "raikkonen" = "Kimi Räikkönen",
+                    "latifi" = "Nicholas Latifi",
+                    "giovinazzi" = "Antonio Giovinazzi",
+                    "mick_schumacher" = "Mick Schumacher",
+                    "kubica" = "Robert Kubica",
+                    "mazepin" = "Nikita Mazepin"
+                    )
+                 )
+
+mon_quali <- getQualifyingResults(2021,5) |>
+  select(position, driverId) |>
+  filter(position == 1 )|>
+  mutate(driverId = 
+             recode(driverId,
+                    "max_verstappen" = "Max Verstappen",
+                    "hamilton" = "Lewis Hamilton",
+                    "bottas" = "Valtteri Bottas",
+                    "perez" = "Sergio Perez",
+                    "sainz" = "Carlos Sainz Jr.",
+                    "norris" = "Lando Norris",
+                    "leclerc" = "Charles Leclerc",
+                    "ricciardo" = "Daniel Ricciardo",
+                    "gasly" = "Pierre Gasly",
+                    "alonso"= "Fernando Alonso",
+                    "ocon" = "Esteban Ocon",
+                    "vettel" = "Sebastian Vettel",
+                    "stroll" = "Lance Stroll",
+                    "tsunoda" = "Yuki Tsunoda",
+                    "russell" = "George Russell",
+                    "raikkonen" = "Kimi Räikkönen",
+                    "latifi" = "Nicholas Latifi",
+                    "giovinazzi" = "Antonio Giovinazzi",
+                    "mick_schumacher" = "Mick Schumacher",
+                    "kubica" = "Robert Kubica",
+                    "mazepin" = "Nikita Mazepin"
+                    )
+                 )
+
+  bak_quali <- getQualifyingResults(2021,6) |>
+  select(position, driverId) |>
+  filter(position == 1 )|>
+  mutate(driverId = 
+             recode(driverId,
+                    "max_verstappen" = "Max Verstappen",
+                    "hamilton" = "Lewis Hamilton",
+                    "bottas" = "Valtteri Bottas",
+                    "perez" = "Sergio Perez",
+                    "sainz" = "Carlos Sainz Jr.",
+                    "norris" = "Lando Norris",
+                    "leclerc" = "Charles Leclerc",
+                    "ricciardo" = "Daniel Ricciardo",
+                    "gasly" = "Pierre Gasly",
+                    "alonso"= "Fernando Alonso",
+                    "ocon" = "Esteban Ocon",
+                    "vettel" = "Sebastian Vettel",
+                    "stroll" = "Lance Stroll",
+                    "tsunoda" = "Yuki Tsunoda",
+                    "russell" = "George Russell",
+                    "raikkonen" = "Kimi Räikkönen",
+                    "latifi" = "Nicholas Latifi",
+                    "giovinazzi" = "Antonio Giovinazzi",
+                    "mick_schumacher" = "Mick Schumacher",
+                    "kubica" = "Robert Kubica",
+                    "mazepin" = "Nikita Mazepin"
+                    )
+                 )
+  
+  fra_quali <- getQualifyingResults(2021,7) |>
+  select(position, driverId) |>
+  filter(position == 1 )|>
+  mutate(driverId = 
+             recode(driverId,
+                    "max_verstappen" = "Max Verstappen",
+                    "hamilton" = "Lewis Hamilton",
+                    "bottas" = "Valtteri Bottas",
+                    "perez" = "Sergio Perez",
+                    "sainz" = "Carlos Sainz Jr.",
+                    "norris" = "Lando Norris",
+                    "leclerc" = "Charles Leclerc",
+                    "ricciardo" = "Daniel Ricciardo",
+                    "gasly" = "Pierre Gasly",
+                    "alonso"= "Fernando Alonso",
+                    "ocon" = "Esteban Ocon",
+                    "vettel" = "Sebastian Vettel",
+                    "stroll" = "Lance Stroll",
+                    "tsunoda" = "Yuki Tsunoda",
+                    "russell" = "George Russell",
+                    "raikkonen" = "Kimi Räikkönen",
+                    "latifi" = "Nicholas Latifi",
+                    "giovinazzi" = "Antonio Giovinazzi",
+                    "mick_schumacher" = "Mick Schumacher",
+                    "kubica" = "Robert Kubica",
+                    "mazepin" = "Nikita Mazepin"
+                    )
+                 )
+  
+  sty_quali <- getQualifyingResults(2021,8) |>
+  select(position, driverId) |>
+  filter(position == 1 )|>
+  mutate(driverId = 
+             recode(driverId,
+                    "max_verstappen" = "Max Verstappen",
+                    "hamilton" = "Lewis Hamilton",
+                    "bottas" = "Valtteri Bottas",
+                    "perez" = "Sergio Perez",
+                    "sainz" = "Carlos Sainz Jr.",
+                    "norris" = "Lando Norris",
+                    "leclerc" = "Charles Leclerc",
+                    "ricciardo" = "Daniel Ricciardo",
+                    "gasly" = "Pierre Gasly",
+                    "alonso"= "Fernando Alonso",
+                    "ocon" = "Esteban Ocon",
+                    "vettel" = "Sebastian Vettel",
+                    "stroll" = "Lance Stroll",
+                    "tsunoda" = "Yuki Tsunoda",
+                    "russell" = "George Russell",
+                    "raikkonen" = "Kimi Räikkönen",
+                    "latifi" = "Nicholas Latifi",
+                    "giovinazzi" = "Antonio Giovinazzi",
+                    "mick_schumacher" = "Mick Schumacher",
+                    "kubica" = "Robert Kubica",
+                    "mazepin" = "Nikita Mazepin"
+                    )
+                 )
+  
+  aus_quali <- getQualifyingResults(2021,9) |>
+  select(position, driverId) |>
+  filter(position == 1 )|>
+  mutate(driverId = 
+             recode(driverId,
+                    "max_verstappen" = "Max Verstappen",
+                    "hamilton" = "Lewis Hamilton",
+                    "bottas" = "Valtteri Bottas",
+                    "perez" = "Sergio Perez",
+                    "sainz" = "Carlos Sainz Jr.",
+                    "norris" = "Lando Norris",
+                    "leclerc" = "Charles Leclerc",
+                    "ricciardo" = "Daniel Ricciardo",
+                    "gasly" = "Pierre Gasly",
+                    "alonso"= "Fernando Alonso",
+                    "ocon" = "Esteban Ocon",
+                    "vettel" = "Sebastian Vettel",
+                    "stroll" = "Lance Stroll",
+                    "tsunoda" = "Yuki Tsunoda",
+                    "russell" = "George Russell",
+                    "raikkonen" = "Kimi Räikkönen",
+                    "latifi" = "Nicholas Latifi",
+                    "giovinazzi" = "Antonio Giovinazzi",
+                    "mick_schumacher" = "Mick Schumacher",
+                    "kubica" = "Robert Kubica",
+                    "mazepin" = "Nikita Mazepin"
+                    )
+                 )
+  
+  bri_quali <- getQualifyingResults(2021,10) |>
+  select(position, driverId) |>
+  filter(position == 1 )|>
+  mutate(driverId = 
+             recode(driverId,
+                    "max_verstappen" = "Max Verstappen",
+                    "hamilton" = "Lewis Hamilton",
+                    "bottas" = "Valtteri Bottas",
+                    "perez" = "Sergio Perez",
+                    "sainz" = "Carlos Sainz Jr.",
+                    "norris" = "Lando Norris",
+                    "leclerc" = "Charles Leclerc",
+                    "ricciardo" = "Daniel Ricciardo",
+                    "gasly" = "Pierre Gasly",
+                    "alonso"= "Fernando Alonso",
+                    "ocon" = "Esteban Ocon",
+                    "vettel" = "Sebastian Vettel",
+                    "stroll" = "Lance Stroll",
+                    "tsunoda" = "Yuki Tsunoda",
+                    "russell" = "George Russell",
+                    "raikkonen" = "Kimi Räikkönen",
+                    "latifi" = "Nicholas Latifi",
+                    "giovinazzi" = "Antonio Giovinazzi",
+                    "mick_schumacher" = "Mick Schumacher",
+                    "kubica" = "Robert Kubica",
+                    "mazepin" = "Nikita Mazepin"
+                    )
+                 )
+  
+  hun_quali <- getQualifyingResults(2021,11) |>
+  select(position, driverId) |>
+  filter(position == 1 )|>
+  mutate(driverId = 
+             recode(driverId,
+                    "max_verstappen" = "Max Verstappen",
+                    "hamilton" = "Lewis Hamilton",
+                    "bottas" = "Valtteri Bottas",
+                    "perez" = "Sergio Perez",
+                    "sainz" = "Carlos Sainz Jr.",
+                    "norris" = "Lando Norris",
+                    "leclerc" = "Charles Leclerc",
+                    "ricciardo" = "Daniel Ricciardo",
+                    "gasly" = "Pierre Gasly",
+                    "alonso"= "Fernando Alonso",
+                    "ocon" = "Esteban Ocon",
+                    "vettel" = "Sebastian Vettel",
+                    "stroll" = "Lance Stroll",
+                    "tsunoda" = "Yuki Tsunoda",
+                    "russell" = "George Russell",
+                    "raikkonen" = "Kimi Räikkönen",
+                    "latifi" = "Nicholas Latifi",
+                    "giovinazzi" = "Antonio Giovinazzi",
+                    "mick_schumacher" = "Mick Schumacher",
+                    "kubica" = "Robert Kubica",
+                    "mazepin" = "Nikita Mazepin"
+                    )
+                 )
+  
+  bel_quali <- getQualifyingResults(2021,12) |>
+  select(position, driverId) |>
+  filter(position == 1 )|>
+  mutate(driverId = 
+             recode(driverId,
+                    "max_verstappen" = "Max Verstappen",
+                    "hamilton" = "Lewis Hamilton",
+                    "bottas" = "Valtteri Bottas",
+                    "perez" = "Sergio Perez",
+                    "sainz" = "Carlos Sainz Jr.",
+                    "norris" = "Lando Norris",
+                    "leclerc" = "Charles Leclerc",
+                    "ricciardo" = "Daniel Ricciardo",
+                    "gasly" = "Pierre Gasly",
+                    "alonso"= "Fernando Alonso",
+                    "ocon" = "Esteban Ocon",
+                    "vettel" = "Sebastian Vettel",
+                    "stroll" = "Lance Stroll",
+                    "tsunoda" = "Yuki Tsunoda",
+                    "russell" = "George Russell",
+                    "raikkonen" = "Kimi Räikkönen",
+                    "latifi" = "Nicholas Latifi",
+                    "giovinazzi" = "Antonio Giovinazzi",
+                    "mick_schumacher" = "Mick Schumacher",
+                    "kubica" = "Robert Kubica",
+                    "mazepin" = "Nikita Mazepin"
+                    )
+                 )
+  
+  ned_quali <- getQualifyingResults(2021,13) |>
+  select(position, driverId) |>
+  filter(position == 1 )|>
+  mutate(driverId = 
+             recode(driverId,
+                    "max_verstappen" = "Max Verstappen",
+                    "hamilton" = "Lewis Hamilton",
+                    "bottas" = "Valtteri Bottas",
+                    "perez" = "Sergio Perez",
+                    "sainz" = "Carlos Sainz Jr.",
+                    "norris" = "Lando Norris",
+                    "leclerc" = "Charles Leclerc",
+                    "ricciardo" = "Daniel Ricciardo",
+                    "gasly" = "Pierre Gasly",
+                    "alonso"= "Fernando Alonso",
+                    "ocon" = "Esteban Ocon",
+                    "vettel" = "Sebastian Vettel",
+                    "stroll" = "Lance Stroll",
+                    "tsunoda" = "Yuki Tsunoda",
+                    "russell" = "George Russell",
+                    "raikkonen" = "Kimi Räikkönen",
+                    "latifi" = "Nicholas Latifi",
+                    "giovinazzi" = "Antonio Giovinazzi",
+                    "mick_schumacher" = "Mick Schumacher",
+                    "kubica" = "Robert Kubica",
+                    "mazepin" = "Nikita Mazepin"
+                    )
+                 )
+  
+  ita_quali <- getQualifyingResults(2021,14) |>
+  select(position, driverId) |>
+  filter(position == 1 )|>
+  mutate(driverId = 
+             recode(driverId,
+                    "max_verstappen" = "Max Verstappen",
+                    "hamilton" = "Lewis Hamilton",
+                    "bottas" = "Valtteri Bottas",
+                    "perez" = "Sergio Perez",
+                    "sainz" = "Carlos Sainz Jr.",
+                    "norris" = "Lando Norris",
+                    "leclerc" = "Charles Leclerc",
+                    "ricciardo" = "Daniel Ricciardo",
+                    "gasly" = "Pierre Gasly",
+                    "alonso"= "Fernando Alonso",
+                    "ocon" = "Esteban Ocon",
+                    "vettel" = "Sebastian Vettel",
+                    "stroll" = "Lance Stroll",
+                    "tsunoda" = "Yuki Tsunoda",
+                    "russell" = "George Russell",
+                    "raikkonen" = "Kimi Räikkönen",
+                    "latifi" = "Nicholas Latifi",
+                    "giovinazzi" = "Antonio Giovinazzi",
+                    "mick_schumacher" = "Mick Schumacher",
+                    "kubica" = "Robert Kubica",
+                    "mazepin" = "Nikita Mazepin"
+                    )
+                 )
+  
+  rus_quali <- getQualifyingResults(2021,15) |>
+  select(position, driverId) |>
+  filter(position == 1 )|>
+  mutate(driverId = 
+             recode(driverId,
+                    "max_verstappen" = "Max Verstappen",
+                    "hamilton" = "Lewis Hamilton",
+                    "bottas" = "Valtteri Bottas",
+                    "perez" = "Sergio Perez",
+                    "sainz" = "Carlos Sainz Jr.",
+                    "norris" = "Lando Norris",
+                    "leclerc" = "Charles Leclerc",
+                    "ricciardo" = "Daniel Ricciardo",
+                    "gasly" = "Pierre Gasly",
+                    "alonso"= "Fernando Alonso",
+                    "ocon" = "Esteban Ocon",
+                    "vettel" = "Sebastian Vettel",
+                    "stroll" = "Lance Stroll",
+                    "tsunoda" = "Yuki Tsunoda",
+                    "russell" = "George Russell",
+                    "raikkonen" = "Kimi Räikkönen",
+                    "latifi" = "Nicholas Latifi",
+                    "giovinazzi" = "Antonio Giovinazzi",
+                    "mick_schumacher" = "Mick Schumacher",
+                    "kubica" = "Robert Kubica",
+                    "mazepin" = "Nikita Mazepin"
+                    )
+                 )
+  
+  tur_quali <- getQualifyingResults(2021,16) |>
+  select(position, driverId) |>
+  filter(position == 1 )|>
+  mutate(driverId = 
+             recode(driverId,
+                    "max_verstappen" = "Max Verstappen",
+                    "hamilton" = "Lewis Hamilton",
+                    "bottas" = "Valtteri Bottas",
+                    "perez" = "Sergio Perez",
+                    "sainz" = "Carlos Sainz Jr.",
+                    "norris" = "Lando Norris",
+                    "leclerc" = "Charles Leclerc",
+                    "ricciardo" = "Daniel Ricciardo",
+                    "gasly" = "Pierre Gasly",
+                    "alonso"= "Fernando Alonso",
+                    "ocon" = "Esteban Ocon",
+                    "vettel" = "Sebastian Vettel",
+                    "stroll" = "Lance Stroll",
+                    "tsunoda" = "Yuki Tsunoda",
+                    "russell" = "George Russell",
+                    "raikkonen" = "Kimi Räikkönen",
+                    "latifi" = "Nicholas Latifi",
+                    "giovinazzi" = "Antonio Giovinazzi",
+                    "mick_schumacher" = "Mick Schumacher",
+                    "kubica" = "Robert Kubica",
+                    "mazepin" = "Nikita Mazepin"
+                    )
+                 )
+  
+  usa_quali <- getQualifyingResults(2021,17) |>
+  select(position, driverId) |>
+  filter(position == 1 )|>
+  mutate(driverId = 
+             recode(driverId,
+                    "max_verstappen" = "Max Verstappen",
+                    "hamilton" = "Lewis Hamilton",
+                    "bottas" = "Valtteri Bottas",
+                    "perez" = "Sergio Perez",
+                    "sainz" = "Carlos Sainz Jr.",
+                    "norris" = "Lando Norris",
+                    "leclerc" = "Charles Leclerc",
+                    "ricciardo" = "Daniel Ricciardo",
+                    "gasly" = "Pierre Gasly",
+                    "alonso"= "Fernando Alonso",
+                    "ocon" = "Esteban Ocon",
+                    "vettel" = "Sebastian Vettel",
+                    "stroll" = "Lance Stroll",
+                    "tsunoda" = "Yuki Tsunoda",
+                    "russell" = "George Russell",
+                    "raikkonen" = "Kimi Räikkönen",
+                    "latifi" = "Nicholas Latifi",
+                    "giovinazzi" = "Antonio Giovinazzi",
+                    "mick_schumacher" = "Mick Schumacher",
+                    "kubica" = "Robert Kubica",
+                    "mazepin" = "Nikita Mazepin"
+                    )
+                 )
+  
+  mex_quali <- getQualifyingResults(2021,18) |>
+  select(position, driverId) |>
+  filter(position == 1 )|>
+  mutate(driverId = 
+             recode(driverId,
+                    "max_verstappen" = "Max Verstappen",
+                    "hamilton" = "Lewis Hamilton",
+                    "bottas" = "Valtteri Bottas",
+                    "perez" = "Sergio Perez",
+                    "sainz" = "Carlos Sainz Jr.",
+                    "norris" = "Lando Norris",
+                    "leclerc" = "Charles Leclerc",
+                    "ricciardo" = "Daniel Ricciardo",
+                    "gasly" = "Pierre Gasly",
+                    "alonso"= "Fernando Alonso",
+                    "ocon" = "Esteban Ocon",
+                    "vettel" = "Sebastian Vettel",
+                    "stroll" = "Lance Stroll",
+                    "tsunoda" = "Yuki Tsunoda",
+                    "russell" = "George Russell",
+                    "raikkonen" = "Kimi Räikkönen",
+                    "latifi" = "Nicholas Latifi",
+                    "giovinazzi" = "Antonio Giovinazzi",
+                    "mick_schumacher" = "Mick Schumacher",
+                    "kubica" = "Robert Kubica",
+                    "mazepin" = "Nikita Mazepin"
+                    )
+                 )
+  
+  bra_quali <- getQualifyingResults(2021,19) |>
+  select(position, driverId) |>
+  filter(position == 1 )|>
+  mutate(driverId = 
+             recode(driverId,
+                    "max_verstappen" = "Max Verstappen",
+                    "hamilton" = "Lewis Hamilton",
+                    "bottas" = "Valtteri Bottas",
+                    "perez" = "Sergio Perez",
+                    "sainz" = "Carlos Sainz Jr.",
+                    "norris" = "Lando Norris",
+                    "leclerc" = "Charles Leclerc",
+                    "ricciardo" = "Daniel Ricciardo",
+                    "gasly" = "Pierre Gasly",
+                    "alonso"= "Fernando Alonso",
+                    "ocon" = "Esteban Ocon",
+                    "vettel" = "Sebastian Vettel",
+                    "stroll" = "Lance Stroll",
+                    "tsunoda" = "Yuki Tsunoda",
+                    "russell" = "George Russell",
+                    "raikkonen" = "Kimi Räikkönen",
+                    "latifi" = "Nicholas Latifi",
+                    "giovinazzi" = "Antonio Giovinazzi",
+                    "mick_schumacher" = "Mick Schumacher",
+                    "kubica" = "Robert Kubica",
+                    "mazepin" = "Nikita Mazepin"
+                    )
+                 )
+  
+  qat_quali <- getQualifyingResults(2021,20) |>
+  select(position, driverId) |>
+  filter(position == 1 )|>
+  mutate(driverId = 
+             recode(driverId,
+                    "max_verstappen" = "Max Verstappen",
+                    "hamilton" = "Lewis Hamilton",
+                    "bottas" = "Valtteri Bottas",
+                    "perez" = "Sergio Perez",
+                    "sainz" = "Carlos Sainz Jr.",
+                    "norris" = "Lando Norris",
+                    "leclerc" = "Charles Leclerc",
+                    "ricciardo" = "Daniel Ricciardo",
+                    "gasly" = "Pierre Gasly",
+                    "alonso"= "Fernando Alonso",
+                    "ocon" = "Esteban Ocon",
+                    "vettel" = "Sebastian Vettel",
+                    "stroll" = "Lance Stroll",
+                    "tsunoda" = "Yuki Tsunoda",
+                    "russell" = "George Russell",
+                    "raikkonen" = "Kimi Räikkönen",
+                    "latifi" = "Nicholas Latifi",
+                    "giovinazzi" = "Antonio Giovinazzi",
+                    "mick_schumacher" = "Mick Schumacher",
+                    "kubica" = "Robert Kubica",
+                    "mazepin" = "Nikita Mazepin"
+                    )
+                 )
+  
+  ksa_quali <- getQualifyingResults(2021,21) |>
+  select(position, driverId) |>
+  filter(position == 1 )|>
+  mutate(driverId = 
+             recode(driverId,
+                    "max_verstappen" = "Max Verstappen",
+                    "hamilton" = "Lewis Hamilton",
+                    "bottas" = "Valtteri Bottas",
+                    "perez" = "Sergio Perez",
+                    "sainz" = "Carlos Sainz Jr.",
+                    "norris" = "Lando Norris",
+                    "leclerc" = "Charles Leclerc",
+                    "ricciardo" = "Daniel Ricciardo",
+                    "gasly" = "Pierre Gasly",
+                    "alonso"= "Fernando Alonso",
+                    "ocon" = "Esteban Ocon",
+                    "vettel" = "Sebastian Vettel",
+                    "stroll" = "Lance Stroll",
+                    "tsunoda" = "Yuki Tsunoda",
+                    "russell" = "George Russell",
+                    "raikkonen" = "Kimi Räikkönen",
+                    "latifi" = "Nicholas Latifi",
+                    "giovinazzi" = "Antonio Giovinazzi",
+                    "mick_schumacher" = "Mick Schumacher",
+                    "kubica" = "Robert Kubica",
+                    "mazepin" = "Nikita Mazepin"
+                    )
+                 )
+  
+  abu_quali <- getQualifyingResults(2021,22) |>
+  select(position, driverId) |>
+  filter(position == 1 )|>
+  mutate(driverId = 
+             recode(driverId,
+                    "max_verstappen" = "Max Verstappen",
+                    "hamilton" = "Lewis Hamilton",
+                    "bottas" = "Valtteri Bottas",
+                    "perez" = "Sergio Perez",
+                    "sainz" = "Carlos Sainz Jr.",
+                    "norris" = "Lando Norris",
+                    "leclerc" = "Charles Leclerc",
+                    "ricciardo" = "Daniel Ricciardo",
+                    "gasly" = "Pierre Gasly",
+                    "alonso"= "Fernando Alonso",
+                    "ocon" = "Esteban Ocon",
+                    "vettel" = "Sebastian Vettel",
+                    "stroll" = "Lance Stroll",
+                    "tsunoda" = "Yuki Tsunoda",
+                    "russell" = "George Russell",
+                    "raikkonen" = "Kimi Räikkönen",
+                    "latifi" = "Nicholas Latifi",
+                    "giovinazzi" = "Antonio Giovinazzi",
+                    "mick_schumacher" = "Mick Schumacher",
+                    "kubica" = "Robert Kubica",
+                    "mazepin" = "Nikita Mazepin"
+                    )
+                 )
+  
+```
+
+
+```{r fig3, echo = FALSE, fig.cap= "Total number of pole positions amongst the drivers that have qualified P1"}
+qualifying <- bind_rows (bah_quali, imo_quali, por_quali, spa_quali, mon_quali, bak_quali, fra_quali, sty_quali, aus_quali, bri_quali, hun_quali, bel_quali, ned_quali, ita_quali, rus_quali, tur_quali, usa_quali, mex_quali, bra_quali, qat_quali, ksa_quali, abu_quali)|>
+count(vars = driverId) 
+
+qualifying |>
+  ggplot(aes(x = n, y =  vars)) + geom_bar(stat = "identity") + labs(x = "Number of Pole Positions", y = "Driver") 
+
+```
+
+
+```{r points_clean, include=FALSE}
+
+bah_points <- 
+  getRaceResults(2021,1)|>
+  select(driverId, points) |>
+  pivot_wider(names_from = driverId, values_from = points) 
+
+ 
+imo_points <- getRaceResults(2021,2)|>
+ select(driverId, points) |>
+  pivot_wider(names_from = driverId, values_from = points) 
+
+por_points <- getRaceResults(2021,3)|>
+ select(driverId, points) |>
+  pivot_wider(names_from = driverId, values_from = points) 
+
+spa_points <- getRaceResults(2021,4)|>
+ select(driverId, points) |>
+  pivot_wider(names_from = driverId, values_from = points) 
+  
+mon_points <- getRaceResults(2021,5)|>
+ select(driverId, points) |>
+  pivot_wider(names_from = driverId, values_from = points) 
+  
+bak_points <-  getRaceResults(2021,6)|>
+ select(driverId, points) |>
+  pivot_wider(names_from = driverId, values_from = points) 
+
+fra_points <- getRaceResults(2021,7)|>
+ select(driverId, points) |>
+  pivot_wider(names_from = driverId, values_from = points) 
+ 
+sty_points <- getRaceResults(2021,8)|>
+ select(driverId, points) |>
+  pivot_wider(names_from = driverId, values_from = points) 
+
+aus_points <-   getRaceResults(2021,9)|>
+ select(driverId, points) |>
+  pivot_wider(names_from = driverId, values_from = points) 
+  
+bri_points <-  getRaceResults(2021,10)|>
+ select(driverId, points) |>
+  pivot_wider(names_from = driverId, values_from = points) 
+
+hun_points <- getRaceResults(2021,11)|>
+ select(driverId, points) |>
+  pivot_wider(names_from = driverId, values_from = points) 
+
+bel_points <- getRaceResults(2021,12)|>
+ select(driverId, points) |>
+  pivot_wider(names_from = driverId, values_from = points) 
+  
+ned_points <- getRaceResults(2021,13)|>
+ select(driverId, points) |>
+  pivot_wider(names_from = driverId, values_from = points) 
+  
+ita_points <- getRaceResults(2021,14)|>
+  select(driverId, points) |>
+  pivot_wider(names_from = driverId, values_from = points) 
+  
+rus_points <- getRaceResults(2021,15)|>
+   select(driverId, points) |>
+  pivot_wider(names_from = driverId, values_from = points) 
+  
+tur_points <- getRaceResults(2021,16)|>
+ select(driverId, points) |>
+  pivot_wider(names_from = driverId, values_from = points) 
+  
+usa_points <- getRaceResults(2021,17)|>
+   select(driverId, points) |>
+  pivot_wider(names_from = driverId, values_from = points) 
+  
+mex_points <- getRaceResults(2021,18)|>
+ select(driverId, points) |>
+  pivot_wider(names_from = driverId, values_from = points) 
+
+bra_points <- getRaceResults(2021,19)|>
+   select(driverId, points) |>
+  pivot_wider(names_from = driverId, values_from = points) 
+
+qat_points <- getRaceResults(2021,20) |>
+ select(driverId, points) |>
+  pivot_wider(names_from = driverId, values_from = points) 
+
+ksa_points <- getRaceResults(2021,21)|>
+ select(driverId, points) |>
+  pivot_wider(names_from = driverId, values_from = points) 
+  
+
+abu_points <-  getRaceResults(2021,22) |>
+ select(driverId, points) |>
+  pivot_wider(names_from = driverId, values_from = points)
+ 
+   
+
+```
+
+
+```{r points_cleaning, include = FALSE}
+points2021 <- bind_rows(bah_points, imo_points, por_points, spa_points, mon_points, bak_points, fra_points, sty_points, aus_points, bri_points, hun_points, bel_points, ned_points, ita_points, rus_points, tur_points, usa_points, mex_points, bra_points, qat_points, ksa_points, abu_points) |>
+  tibble::rowid_to_column("Round")
+  
+  
+  points2021$ham <- cumsum(points2021$hamilton)
+  points2021$ver <- cumsum(points2021$max_verstappen)
+  points2021$bot <- cumsum(points2021$bottas)
+  points2021$per <- cumsum(points2021$perez)
+  points2021$nor <- cumsum(points2021$norris)
+  points2021$ric <- cumsum(points2021$ricciardo)
+  points2021$lec <- cumsum(points2021$leclerc)
+  points2021$sai <- cumsum(points2021$sainz)
+  points2021$vet <- cumsum(points2021$vettel)
+  points2021$str <- cumsum(points2021$stroll)
+  points2021$tsu <- cumsum(points2021$tsunoda)
+  points2021$gas <- cumsum(points2021$gasly)
+  points2021$rai <- cumsum(points2021$raikkonen)
+  points2021$gio <- cumsum(points2021$giovinazzi)
+  points2021$alo <- cumsum(points2021$alonso)
+  points2021$oco <- cumsum(points2021$ocon)
+  points2021$rus <- cumsum(points2021$russell)
+  points2021$lat <- cumsum(points2021$latifi)
+  points2021$msc <- cumsum(points2021$mick_schumacher)
+  points2021$maz <- cumsum(points2021$mazepin)
+  points2021$kub <- cumsum(points2021$kubica)
+  
+  points2021 |>
+    select(Round, ham, ver, bot, per, nor, ric, lec, sai, vet, str, tsu, gas, rai, gio, alo, oco, rus,lat,msc,maz,kub)
+  
+```
+
+## Points Progression
+
+Figure \@ref(fig:fig4) shows the points progression of the 2021 Formula One Championship. Max Verstappen had the most number of points at the end of the season.
+A quick note about Kubica: Alfa Romeo reserve driver, Robert Kubica was brought in to race at two Grand Prix: the Dutch GP and the Italian GP. This was because Kimi Räikkönen tested positive for COVID-19 and was therefore unable to compete [@Kubica].
+
+```{r fig4, echo = FALSE, warning=FALSE, fig.cap = "World Drivers Championship points progression of the 2021 Formula 1 season", fig.width= 20, fig.height= 7 }
+  
+points2021 |>
+  ggplot(aes(x = Round)) + 
+    geom_line(aes(y = ham, colour = "Lewis Hamilton")) + 
+    geom_line(aes(y = ver, colour = "Max Verstappen")) +
+    geom_line(aes(y = nor, colour = "Lando Norris")) +
+    geom_line(aes(y = ric, colour = "Daniel Ricciardo")) +
+    geom_line(aes(y = bot, colour = "Valtteri Bottas")) +
+    geom_line(aes(y = per, colour = "Sergio Perez")) +
+    geom_line(aes(y = lec, colour = "Charles Leclerc")) +
+    geom_line(aes(y = sai, colour = "Carlos Sainz Jr.")) +
+    geom_line(aes(y = vet, colour = "Sebastian Vettel")) + 
+    geom_line(aes(y = str, color = "Lance Stroll")) +
+    geom_line(aes(y = tsu, colour = "Yuki Tsunoda")) +
+    geom_line(aes(y = gas, colour = "Pierre Gasly")) +
+    geom_line(aes(y = rai, colour = "Kimi Räikkönen")) +
+    geom_line(aes(y = gio, colour = "Antonio Giovinazzi")) + 
+    geom_line(aes(y = alo, colour = "Fernando Alonso")) +
+    geom_line(aes(y = oco, colour = "Esteban Ocon")) +
+    geom_line(aes(y = rus, colour = "George Russell")) +
+    geom_line(aes(y = lat, colour = "Nicholas Latifi")) +
+    geom_line(aes(y = msc, colour = "Mick Schumacher")) +
+    geom_line(aes(y = maz, colour = "Nikita Mazepin")) +
+    geom_line(aes(y = kub, colour = "Robert Kubica")) +
+    theme_minimal() +
+    labs (x = "Round", y = "Points", colour = "Drivers")
+  
+
+```
+  
+  
+\newpage
+
+# Discussion
+
+## Verstappen and  Hamilton were in their own league
+The Formula 1 grid is comprised of 20 of the fastest drivers in the world. However, the 2021 season showed that the championship battle involved nobody but Max Verstappen and Lewis Hamilton. As Figure \@ref(fig:fig4) shows, their points totals were far beyond the rest of the grid. Both Verstappen and Hamilton finished the season with 395 and 387 points respectively (Table \@ref(tab:tab3). Their closest competitor was Valtteri Bottas, who finished third with 226 points, as seen in Table \@ref(tab:tab3). Verstappen won the most races in the 2021 season, with 10 wins. Hamilton had 8 race wins. They were also the only drivers to win multiple races, as shown in Figure \@ref(fig:fig1). Verstappen also made the most appearance on the podium, with 18. Hamilton was a close second, with 17 appearances [Figure \@ref(fig:fig2)]. When comparing qualifying, both Verstappen and Hamilton had similar results. They were both on pole position 8 times [Figure \@ref(fig:fig3)]. However, this does not take into consideration the Sprint qualifying format, which is discussed further below.
+
+## Context about Sprint Races and Qualifying Results
+
+When looking at Figure \@ref(fig:fig3), it must be noted that for data collection purposes, the results of the Sprint are not filed under the Qualifying category. However, the driver who was on pole during a Saturday Qualifying was on pole for the Sprint race and not the Grand Prix. The Sprint format was held at the British GP, Italian GP and Brazilian GP. While Lewis Hamilton was on pole for the inaugural Sprint race at the British GP, Max Verstappen won the Sprint race [@British]. Therefore, he was on pole for the Sunday GP. At the Italian GP, Valtteri Bottas was on pole both at the end of Qualifying as well as the Sprint [@Monza]. At the final Sprint event of the 2021 season in Brazil, Hamilton was once again on pole for the Sprint, but his teammate Bottas won his second consecutive Sprint in a row [@Brazil]. In terms of success at the Sprint format, Hamilton is the clear winner. 
+
+
+# Conclusion
+Max Verstappen was crowned the 2021 F1 champion, and deservedly so. With the most race wins and podium appearances, his numbers back up his performance. Additionally,he led the most laps out of anyone on the grid [@Matthew_2021]. 652 laps to be exact, which is double the number of laps Hamilton led (297) [@Matthew_2021]. He also had drove 6 of the fastest laps of the season [@Matthew_2021].
+
+
+\newpage
+
+\appendix
+
+# Appendix {-}
+
+## Datasheet for the Dataset
+
+### Motivation
+
+\begin{enumerate}
+  \item For what purpose was the dataset created? Was there a specific task in mind? Was there a specific gap that needed to be filled? Please provide a description.
+  The dataset was created to enable analysis of Formula One data. 
+  \item Who created the dataset (for example, which team, research group) and on behalf of which entity (for example, company, institution, organization)?
+Alex Kraieski created the package but the Ergast API is run by a user that goes by Chris.
+  \item Who funded the creation of the dataset? If there is an associated grant, please provide the name of the grantor and the grant name and number.
+It is unknown if the creation was funded.
+\end{enumerate}
+
+### Composition
+
+\begin{enumerate}
+\item What do the instances that comprise the dataset represent (for example, documents, photos, people, countries)? Are there multiple types of instances (for example, movies, users, and ratings; people and interactions between them; nodes and edges)? Please provide a description.
+This depends on the dataset you use. For example, the Final F1 Standings dataset for the 2021 season consists of the final standing, driver name, constructor name, points total and number of wins.
+\item How many instances are there in total (of each type, if appropriate)?
+Queries can be made in 12 different categories.
+\item Does the dataset contain all possible instances or is it a sample (not necessarily random) of instances from a larger set? If the dataset is a sample, then what is the larger set? Is the sample representative of the larger set (for example, geographic coverage)? If so, please describe how this representativeness was validated/verified. If it is not representative of the larger set, please describe why not (for example, to cover a more diverse range of instances, because instances were withheld or unavailable).
+Race data is available for the very first year of the F1 world championship in 1950.
+\item What data does each instance consist of? “Raw” data (for example, unprocessed text or images) or features? In either case, please provide a description.
+Some datasets consist of numbers (race results, qualifying results, etc). Some are links to Wikipedia pages of indivduals and circuits. It depends.
+\item Is there a label or target associated with each instance? If so, please provide a description.
+Each Grand Prix has its own ID. The season corresponds to thh year it is held in.
+\item Is any information missing from individual instances? If so, please provide a description, explaining why this information is missing (for example, because it was unavailable). This does not include intentionally removed information, but might include, for example, redacted text.
+Some race results are not available for a certain driver if they did not take part in the race.
+\item Are relationships between individual instances made explicit (for example, users’ movie ratings, social network links)? If so, please describe how these relationships are made explicit.
+No.
+\item Are there recommended data splits (for example, training, development/validation, testing)? If so, please provide a description of these splits, explaining the rationale behind them.
+No.
+\item Are there any errors, sources of noise, or redundancies in the dataset? If so, please provide a description.
+No
+\item Is the dataset self-contained, or does it link to or otherwise rely on external resources (for example, websites, tweets, other datasets)? If it links to or relies on external resources, a) are there guarantees that they will exist, and remain constant, over time; b) are there official archival versions of the complete dataset (that is, including the external resources as they existed at the time the dataset was created); c) are there any restrictions (for example, licenses, fees) associated with any of the external resources that might apply to a dataset consumer? Please provide descriptions of all external resources and any restrictions associated with them, as well as links or other access points, as appropriate.
+Self-contained.
+\item Does the dataset contain data that might be considered confidential (for example, data that is protected by legal privilege or by doctor-patient confidentiality, data that includes the content of individuals’ non-public communications)? If so, please provide a description.
+No, all data were gathered from public sources.
+\item Does the dataset contain data that, if viewed directly, might be offensive, insulting, threatening, or might otherwise cause anxiety? If so, please describe why.
+No.
+\item Does the dataset identify any sub-populations (for example, by age, gender)? If so, please describe how these subpopulations are identified and provide a description of their respective distributions within the dataset.
+Yes, name, age, date of birth, nationality and car number.
+\item Is it possible to identify individuals (that is, one or more natural persons), either directly or indirectly (that is, in combination with other data) from the dataset? If so, please describe how.
+Yes, individuals are identified by name.
+\item Does the dataset contain data that might be considered sensitive in any way (for example, data that reveals race or ethnic origins, sexual orientations, religious beliefs, political opinions or union memberships, or locations; financial or health data; biometric or genetic data; forms of government identification, such as social security numbers; criminal history)? If so, please provide a description.
+No
+\end{enumerate}
+
+### Collection process
+
+\begin{enumerate}
+\item How was the data associated with each instance acquired? Was the data directly observable (for example, raw text, movie ratings), reported by subjects (for example, survey responses), or indirectly inferred/derived from other data (for example, part-of-speech tags, model-based guesses for age or language)? If the data was reported by subjects or indirectly inferred/derived from other data, was the data validated/verified? If so, please describe how.
+The data were gathered from the Australian Parliamentary Handbook in the first instance, and this was augmented with information from other parliaments, especially Victoria and New South Wales, and Wikipedia.
+\item What mechanisms or procedures were used to collect the data (for example, hardware apparatuses or sensors, manual human curation, software programs, software APIs)? How were these mechanisms or procedures validated?
+Scraping and parsing using R.
+\item If the dataset is a sample from a larger set, what was the sampling strategy (for example, deterministic, probabilistic with specific sampling probabilities)?
+The dataset is not a sample.
+\item Who was involved in the data collection process (for example, students, crowdworkers, contractors) and how were they compensated (for example, how much were crowdworkers paid)?
+Rohan Alexander. Paid as a post-doc and an assistant professor, although this was not tied to this specific project.
+\item Over what timeframe was the data collected? Does this timeframe match the creation timeframe of the data associated with the instances (for example, recent crawl of old news articles)? If not, please describe the timeframe in which the data associated with the instances was created.
+Three years, and then updated from time to time.
+\item Were any ethical review processes conducted (for example, by an institutional review board)? If so, please provide a description of these review processes, including the outcomes, as well as a link or other access point to any supporting documentation.
+No.
+\item Did you collect the data from the individuals in question directly, or obtain it via third parties or other sources (for example, websites)?
+Third parties in almost all cases.
+\item Were the individuals in question notified about the data collection? If so, please describe (or show with screenshots or other information) how notice was provided, and provide a link or other access point to, or otherwise reproduce, the exact language of the notification itself.
+No.
+\item Did the individuals in question consent to the collection and use of their data? If so, please describe (or show with screenshots or other information) how consent was requested and provided, and provide a link or other access point to, or otherwise reproduce, the exact language to which the individuals consented.
+No.
+\item If consent was obtained, were the consenting individuals provided with a mechanism to revoke their consent in the future or for certain uses? If so, please provide a description, as well as a link or other access point to the mechanism (if appropriate).
+Consent was not obtained.
+\item Has an analysis of the potential impact of the dataset and its use on data subjects (for example, a data protection impact analysis) been conducted? If so, please provide a description of this analysis, including the outcomes, as well as a link or other access point to any supporting documentation.
+No.
+\item Any other comments?
+No.
+\end{enumerate}
+
+### Preprocessing/cleaning/labeling
+
+\begin{enumerate}
+\item Was any preprocessing/cleaning/labeling of the data done (for example, discretization or bucketing, tokenization, part-of-speech tagging, SIFT feature extraction, removal of instances, processing of missing values)? If so, please provide a description. If not, you may skip the remaining questions in this section.
+Yes cleaning of the data was done.
+\item Was the “raw” data saved in addition to the preprocessed/cleaned/labeled data (for example, to support unanticipated future uses)? If so, please provide a link or other access point to the “raw” data.
+No. But the package can be accessed at https://github.com/arkraieski/formula1data. The API can be accessed at http://ergast.com/mrd/.
+\item Is the software that was used to preprocess/clean/label the data available? If so, please provide a link or other access point.
+R was used.
+\item Any other comments?
+No
+\end{enumerate}
+
+###Uses
+\begin{enumerate}
+\item Has the dataset been used for any tasks already? If so, please provide a description.
+It has been used for various applications. They can be seen here: http://ergast.com/mrd/gallery/
+\item Is there a repository that links to any or all papers or systems that use the dataset? If so, please provide a link or other access point.
+No
+\item What (other) tasks could the dataset be used for?
+iPhone widget or Smart speaker app
+\item Is there anything about the composition of the dataset or the way it was collected and preprocessed/cleaned/labeled that might impact future uses? For example, is there anything that a dataset consumer might need to know to avoid uses that could result in unfair treatment of individuals or groups (for example, stereotyping, quality of service issues) or other risks or harms (for example, legal risks, financial harms)? If so, please provide a description. Is there anything a dataset consumer could do to mitigate these risks or harms?
+No.
+\item Are there tasks for which the dataset should not be used? If so, please provide a description.
+No.
+\item Any other comments?
+No.
+\end{enumerate}
+
+### Distribution
+\begin{enumerate}
+\item Will the dataset be distributed to third parties outside of the entity (for example, company, institution, organization) on behalf of which the dataset was created? If so, please provide a description.
+The dataset is available through GitHub.
+\item How will the dataset be distributed (for example, tarball on website, API, GitHub)? Does the dataset have a digital object identifier (DOI)?
+API 
+\item When will the dataset be distributed?
+The dataset is available now.
+\item Will the dataset be distributed under a copyright or other intellectual property (IP) license, and/or under applicable terms of use (ToU)? If so, please describe this license and/ or ToU, and provide a link or other access point to, or otherwise reproduce, any relevant licensing terms or ToU, as well as any fees associated with these restrictions.
+No copyright.
+\item Have any third parties imposed IP-based or other restrictions on the data associated with the instances? If so, please describe these restrictions, and provide a link or other access point to, or otherwise reproduce, any relevant licensing terms, as well as any fees associated with these restrictions.
+None that are known.
+\item Do any export controls or other regulatory restrictions apply to the dataset or to individual instances? If so, please describe these restrictions, and provide a link or other access point to, or otherwise reproduce, any supporting documentation.
+None that are known.
+\item Any other comments?
+No.
+\end{enumerate}
+
+### Maintenance
+\begin{enumerate}
+\item Who will be supporting/hosting/maintaining the dataset?
+Ergast API
+\item How can the owner/curator/manager of the dataset be contacted (for example, email address)?
+mailto://admin@ergast.com
+\item Is there an erratum? If so, please provide a link or other access point.
+No, the dataset is just updated.
+\item Will the dataset be updated (for example, to correct labeling errors, add new instances, delete instances)? If so, please describe how often, by whom, and how updates will be communicated to dataset consumers (for example, mailing list, GitHub)?
+Yes, 2 hours after every track session.
+\item If the dataset relates to people, are there applicable limits on the retention of the data associated with the instances (for example, were the individuals in question told that their data would be retained for a fixed period of time and then deleted)? If so, please describe these limits and explain how they will be enforced.
+No.
+\item Will older versions of the dataset continue to be supported/hosted/maintained? If so, please describe how. If not, please describe how its obsolescence will be communicated to dataset consumers.
+No the dataset is just updated. Although a history is available through GitHub.
+\item If others want to extend/augment/build on/contribute to the dataset, is there a mechanism for them to do so? If so, please provide a description. Will these contributions be validated/verified? If so, please describe how. If not, why not? Is there a process for communicating/distributing these contributions to dataset consumers? If so, please provide a description.
+Forum on Ergast website
+\item Any other comments?
+No
+\end{enumerate}
+
+
+
+\newpage
+
+
+# References
+
+
