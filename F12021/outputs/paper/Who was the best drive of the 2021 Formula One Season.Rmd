@@ -2,7 +2,7 @@
 title: "Max Verstappen was the best driver of the 2021 Formula One season."
 author: 
   - Athaliah Biju
-thanks: "Code and data are available at: LINK."
+thanks: "Code and data are available at: https://github.com/anb99/F12021"
 date: "`r format(Sys.time(), '%d %B %Y')`"
 keywords: "Formula One, car racing, motorsport, Verstappen, Hamilton, F1"
 abstract: "This paper will be an analysis on the 2021 Formula One season. 2021 champion, Max Verstappen was crowned under controversial circumstances. Considering other variables ndependent of total point count such as race wins, podiums and pole positions, Verstappen was the best driver of the 2021 season. "
